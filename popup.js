@@ -63,9 +63,15 @@ async function processClipboard() {
     }
 }
 
-// 页面加载完成后开始处理剪切板
+// 页面加载完成后等待获得焦点
 document.addEventListener('DOMContentLoaded', () => {
-    debugLog('页面加载完成，开始处理剪切板');
+    debugLog('页面加载完成，等待获得焦点');
+    window.focus();
+});
+
+// 当页面获得焦点时处理剪切板
+window.addEventListener('focus', () => {
+    debugLog('页面获得焦点，开始处理剪切板');
     processClipboard();
 });
 
