@@ -30,6 +30,12 @@ async function processClipboard() {
         const img = new Image();
         img.src = url;
 
+        // 显示二维码图片
+        const qrImageDiv = document.getElementById('qr-image');
+        qrImageDiv.innerHTML = '';
+        const displayImg = img.cloneNode();
+        qrImageDiv.appendChild(displayImg);
+
         img.onload = async () => {
             debugLog('图片加载完成，开始解析二维码');
             debugLog(`图片尺寸: ${img.naturalWidth}x${img.naturalHeight}`);

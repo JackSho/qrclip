@@ -9,7 +9,10 @@
 
 <body>
     <h1>QRClip</h1>
-    <div id="result">等待二维码解析...</div>
+    <div id="qr-container">
+        <div id="qr-image"></div>
+        <div id="result">等待二维码解析...</div>
+    </div>
     <button id="copy-btn">复制</button>
     <div id="error" style="color: red; display: none;"></div>
     <script src="js/zxing-0.21.3.min.js"></script>
