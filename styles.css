@@ -1,0 +1,35 @@
+body {
+    width: 300px;
+    padding: 10px;
+    font-family: Arial, sans-serif;
+}
+
+#result {
+    margin-top: 20px;
+    word-wrap: break-word;
+    margin-bottom: 10px;
+}
+
+#copy-btn {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    text-align: center;
+    text-decoration: none;
+    display: none;
+    font-size: 14px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+#copy-btn:hover {
+    background-color: #45a049;
+}
+
+.url-link {
+    color: #2196F3;
+    text-decoration: underline;
+    cursor: pointer;
+}

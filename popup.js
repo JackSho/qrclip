@@ -44,7 +44,35 @@ async function processClipboard() {
 
             if (code) {
                 debugLog(`成功解码二维码：${code.data}`);
-                resultDiv.textContent = code.data;
+                const decodedText = code.data;
+                const copyBtn = document.getElementById('copy-btn');
+
+                // 检查是否为URL
+                const isUrl = /^(https?:\/\/)?[\w-]+(\.[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/.test(decodedText);
+
+                if (isUrl) {
+                    // 创建可点击的链接
+                    resultDiv.innerHTML = `<span class="url-link">${decodedText}</span>`;
+                    const urlLink = resultDiv.querySelector('.url-link');
+                    urlLink.addEventListener('click', () => {
+                        chrome.tabs.create({ url: decodedText.startsWith('http') ? decodedText : `https://${decodedText}` });
+                    });
+                } else {
+                    resultDiv.textContent = decodedText;
+                }
+
+                // 显示复制按钮
+                copyBtn.style.display = 'inline-block';
+                copyBtn.onclick = async () => {
+                    try {
+                        await navigator.clipboard.writeText(decodedText);
+                        debugLog('文本已复制到剪切板');
+                    } catch (err) {
+                        debugLog('复制失败');
+                        console.error('复制失败:', err);
+                    }
+                };
+
                 errorDiv.style.display = 'none';
             } else {
                 debugLog('无法解码二维码');
