@@ -1,7 +1,5 @@
-// 导入jsQR库
-const script = document.createElement('script');
-script.src = 'js/jsQR.js';
-document.head.appendChild(script);
+// 初始化ZXing解码器
+const codeReader = new ZXing.BrowserQRCodeReader();
 
 // 调试日志函数
 function debugLog(message) {
@@ -32,58 +30,76 @@ async function processClipboard() {
         const img = new Image();
         img.src = url;
 
-        img.onload = () => {
+        img.onload = async () => {
             debugLog('图片加载完成，开始解析二维码');
-            const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0);
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const code = jsQR(imageData.data, imageData.width, imageData.height);
+            debugLog(`图片尺寸: ${img.naturalWidth}x${img.naturalHeight}`);
 
-            if (code) {
-                debugLog(`成功解码二维码：${code.data}`);
-                const decodedText = code.data;
-                const copyBtn = document.getElementById('copy-btn');
+            // 等待图像完全加载
+            await new Promise(resolve => setTimeout(resolve, 100));
 
-                // 检查是否为URL
-                const isUrl = /^(https?:\/\/)?[\w-]+(\.[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/.test(decodedText);
-
-                if (isUrl) {
-                    // 创建可点击的链接
-                    resultDiv.innerHTML = `<span class="url-link">${decodedText}</span>`;
-                    const urlLink = resultDiv.querySelector('.url-link');
-                    urlLink.addEventListener('click', () => {
-                        chrome.tabs.create({ url: decodedText.startsWith('http') ? decodedText : `https://${decodedText}` });
-                    });
-                } else {
-                    resultDiv.textContent = decodedText;
-                }
-
-                // 显示复制按钮
-                copyBtn.style.display = 'inline-block';
-                copyBtn.onclick = async () => {
-                    try {
-                        await navigator.clipboard.writeText(decodedText);
-                        debugLog('文本已复制到剪切板');
-                    } catch (err) {
-                        debugLog('复制失败');
-                        console.error('复制失败:', err);
-                    }
-                };
-
-                errorDiv.style.display = 'none';
-            } else {
-                debugLog('无法解码二维码');
+            if (!img.complete) {
+                debugLog('图片未完全加载');
                 resultDiv.textContent = '等待二维码解析...';
-                errorDiv.textContent = '无法解码二维码';
+                errorDiv.textContent = '图片未完全加载';
                 errorDiv.style.display = 'block';
+                URL.revokeObjectURL(url);
+                return;
             }
 
-            URL.revokeObjectURL(url);
-        };
-    } catch (error) {
+            try {
+                // 直接使用img元素进行解码
+                const result = await codeReader.decode(img);
+                debugLog('二维码解析完成');
+                if (result && result.text) {
+                    debugLog(`成功解码二维码：${result.text}`);
+                    const decodedText = result.text;
+                    const copyBtn = document.getElementById('copy-btn');
+
+                    // 检查是否为URL
+                    const isUrl = /^(https?:\/\/)?[\w-]+(\.[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/.test(decodedText);
+
+                    if (isUrl) {
+                        // 创建可点击的链接
+                        resultDiv.innerHTML = `<span class="url-link">${decodedText}</span>`;
+                        const urlLink = resultDiv.querySelector('.url-link');
+                        urlLink.addEventListener('click', () => {
+                            chrome.tabs.create({ url: decodedText.startsWith('http') ? decodedText : `https://${decodedText}` });
+                        });
+                    } else {
+                        resultDiv.textContent = decodedText;
+                    }
+
+                    // 显示复制按钮
+                    copyBtn.style.display = 'inline-block';
+                    copyBtn.onclick = async () => {
+                        try {
+                            await navigator.clipboard.writeText(decodedText);
+                            debugLog('文本已复制到剪切板');
+                        } catch (err) {
+                            debugLog('复制失败');
+                            console.error('复制失败:', err);
+                        }
+                    };
+
+                    errorDiv.style.display = 'none';
+                } else {
+                    debugLog('无法解码二维码');
+                    resultDiv.textContent = '等待二维码解析...';
+                    errorDiv.textContent = '无法解码二维码';
+                    errorDiv.style.display = 'block';
+                }
+
+                URL.revokeObjectURL(url);
+            }
+            catch (error) {
+                console.error('Error reading clipboard:', error);
+                resultDiv.textContent = '等待二维码解析...';
+                errorDiv.textContent = '读取剪切板失败';
+                errorDiv.style.display = 'block';
+            }
+        }
+    }
+    catch (error) {
         console.error('Error reading clipboard:', error);
         resultDiv.textContent = '等待二维码解析...';
         errorDiv.textContent = '读取剪切板失败';
@@ -104,7 +120,7 @@ window.addEventListener('focus', () => {
 });
 
 // 通知background.js处理已完成
-chrome.runtime.sendMessage({type: 'processClipboard'}, response => {
+chrome.runtime.sendMessage({ type: 'processClipboard' }, response => {
     if (response && response.success) {
         debugLog('已通知background.js处理完成');
     }
