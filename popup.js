@@ -100,7 +100,7 @@ async function processClipboard() {
             catch (error) {
                 console.error('Error reading clipboard:', error);
                 resultDiv.textContent = 'Waiting for QR code decoding...';
-                errorDiv.textContent = 'Failed to read clipboard';
+                errorDiv.textContent = 'Failed to decode qrcode';
                 errorDiv.style.display = 'block';
             }
         }
