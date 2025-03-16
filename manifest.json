@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "QRClip",
     "version": "1.0",
-    "description": "从剪切板识别并解析二维码",
+    "description": "Detect and parse QR codes from clipboard",
     "permissions": [
         "clipboardRead"
     ],
@@ -16,5 +16,6 @@
             "48": "images/icon48.png",
             "128": "images/icon128.png"
         }
-    }
+    },
+    "homepage_url": "https://github.com/JackSho/qrclip"
 }
