@@ -1,5 +1,7 @@
 // 初始化ZXing解码器
 const codeReader = new ZXing.BrowserQRCodeReader();
+// 初始化ZXing编码器
+const codeWriter = new ZXing.BrowserQRCodeSvgWriter();
 
 // 调试日志函数
 function debugLog(message) {
@@ -11,15 +13,46 @@ async function processClipboard() {
     debugLog('Start reading clipboard content');
     const resultDiv = document.getElementById('result');
     const errorDiv = document.getElementById('error');
+    const qrImageDiv = document.getElementById('qr-image');
+    const copyBtn = document.getElementById('copy-btn');
 
     try {
+        // 尝试读取剪贴板中的文本
+        try {
+            const text = await navigator.clipboard.readText();
+            debugLog('Clipboard text reading completed');
+
+            if (text && text.trim() !== '') {
+                debugLog(`Found text in clipboard: ${text}`);
+
+                // 生成二维码
+                qrImageDiv.innerHTML = '';
+                const qrCode = codeWriter.write(text, 200, 200);
+                qrImageDiv.appendChild(qrCode);
+
+                // 显示文本内容
+                resultDiv.textContent = text;
+
+                // 隐藏复制按钮（文本内容已在剪切板中，不需要再次复制）
+                copyBtn.style.display = 'none';
+                debugLog('Copy button hidden for text content already in clipboard');
+
+                errorDiv.style.display = 'none';
+                return;
+            }
+        } catch (textError) {
+            debugLog('Failed to read text from clipboard, trying image');
+            console.error('Error reading clipboard text:', textError);
+        }
+
+        // 如果没有文本或读取文本失败，尝试读取图像
         const imageData = await navigator.clipboard.read();
         debugLog('Clipboard content reading completed');
 
         if (!imageData || !imageData[0] || !imageData[0].types.includes('image/png')) {
             debugLog('No image in clipboard or unsupported image format');
             resultDiv.textContent = 'Waiting for QR code decoding...';
-            errorDiv.textContent = 'No image in clipboard';
+            errorDiv.textContent = 'No image or text in clipboard';
             errorDiv.style.display = 'block';
             return;
         }
@@ -31,7 +64,6 @@ async function processClipboard() {
         img.src = url;
 
         // 显示二维码图片
-        const qrImageDiv = document.getElementById('qr-image');
         qrImageDiv.innerHTML = '';
         const displayImg = img.cloneNode();
         qrImageDiv.appendChild(displayImg);
