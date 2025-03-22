@@ -55,3 +55,8 @@ body {
     text-decoration: underline;
     cursor: pointer;
 }
+
+#error {
+    color: red;
+    display: none;
+}
