@@ -1,6 +1,6 @@
 # QRClip
 
-A Chrome extension that detects and parses QR codes from clipboard images.
+A Chrome extension that detects and parses QR codes from clipboard images, and generates QR codes from clipboard text content.
 
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/YOUR_EXTENSION_ID_HERE?label=Chrome%20Web%20Store)](https://chrome.google.com/webstore/detail/YOUR_EXTENSION_ID_HERE)
 [![GitHub](https://img.shields.io/github/v/release/JackSho/qrclip?label=GitHub)](https://github.com/JackSho/qrclip)
@@ -45,3 +45,5 @@ A Chrome extension that detects and parses QR codes from clipboard images.
 ### 1.0
 
 - Project initialization, implemented basic QR code recognition functionality.
+  - Support detecting QR codes from clipboard image.
+  - Support generating QR codes from clipboard text.
