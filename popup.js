@@ -1,14 +1,14 @@
-// 初始化ZXing解码器
+// Initialize ZXing decoder
 const codeReader = new ZXing.BrowserQRCodeReader();
-// 初始化ZXing编码器
+// Initialize ZXing encoder
 const codeWriter = new ZXing.BrowserQRCodeSvgWriter();
 
-// 调试日志函数
+// Debug log function
 function debugLog(message) {
     console.log(`[DEBUG] ${new Date().toISOString()} - ${message}`);
 }
 
-// 获取DOM元素
+// Get DOM elements
 function getDOMElements() {
     return {
         resultDiv: document.getElementById('result'),
@@ -18,19 +18,19 @@ function getDOMElements() {
     };
 }
 
-// 显示错误信息
+// Show error message
 function showError(errorDiv, resultDiv, message) {
     resultDiv.textContent = 'Waiting for QR code decoding...';
     errorDiv.textContent = message;
     errorDiv.style.display = 'block';
 }
 
-// 隐藏错误信息
+// Hide error message
 function hideError(errorDiv) {
     errorDiv.style.display = 'none';
 }
 
-// 处理剪贴板中的文本内容
+// Process text content from clipboard
 async function processClipboardText(text, elements) {
     const { resultDiv, errorDiv, qrImageDiv, copyBtn } = elements;
 
@@ -40,15 +40,15 @@ async function processClipboardText(text, elements) {
 
     debugLog(`Found text in clipboard: ${text}`);
 
-    // 生成二维码
+    // Generate QR code
     qrImageDiv.innerHTML = '';
     const qrCode = codeWriter.write(text, 200, 200);
     qrImageDiv.appendChild(qrCode);
 
-    // 显示文本内容
+    // Display text content
     resultDiv.textContent = text;
 
-    // 隐藏复制按钮（文本内容已在剪切板中，不需要再次复制）
+    // Hide copy button (text content is already in clipboard, no need to copy again)
     copyBtn.style.display = 'none';
     debugLog('Copy button hidden for text content already in clipboard');
 
@@ -56,15 +56,15 @@ async function processClipboardText(text, elements) {
     return true;
 }
 
-// 处理解码后的文本
+// Handle decoded text
 function handleDecodedText(decodedText, elements) {
     const { resultDiv, errorDiv, copyBtn } = elements;
 
-    // 检查是否为URL
-    const isUrl = /^(https?:\/\/)?[\w-]+(\.[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/.test(decodedText);
+    // Check if it's a URL
+    const isUrl = /^(https?:\/\/)?[\w-]+(\.\w[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/.test(decodedText);
 
     if (isUrl) {
-        // 创建可点击的链接
+        // Create clickable link
         resultDiv.innerHTML = `<span class="url-link">${decodedText}</span>`;
         const urlLink = resultDiv.querySelector('.url-link');
         urlLink.addEventListener('click', () => {
@@ -74,7 +74,7 @@ function handleDecodedText(decodedText, elements) {
         resultDiv.textContent = decodedText;
     }
 
-    // 显示复制按钮
+    // Show copy button
     copyBtn.style.display = 'inline-block';
     copyBtn.onclick = async () => {
         try {
@@ -82,14 +82,14 @@ function handleDecodedText(decodedText, elements) {
             debugLog('Text copied to clipboard');
         } catch (err) {
             debugLog('Copy failed');
-            console.error('复制失败:', err);
+            console.error('Copy failed:', err);
         }
     };
 
     hideError(errorDiv);
 }
 
-// 处理剪贴板中的图像内容
+// Process image content from clipboard
 async function processClipboardImage(elements) {
     const { resultDiv, errorDiv, qrImageDiv } = elements;
 
@@ -109,12 +109,12 @@ async function processClipboardImage(elements) {
         const img = new Image();
         img.src = url;
 
-        // 显示二维码图片
+        // Display QR code image
         qrImageDiv.innerHTML = '';
         const displayImg = img.cloneNode();
         qrImageDiv.appendChild(displayImg);
 
-        // 处理图像加载和解码
+        // Process image loading and decoding
         await processLoadedImage(img, url, elements);
         return true;
     } catch (error) {
@@ -124,7 +124,7 @@ async function processClipboardImage(elements) {
     }
 }
 
-// 处理加载的图像并解码二维码
+// Process loaded image and decode QR code
 async function processLoadedImage(img, url, elements) {
     const { resultDiv, errorDiv } = elements;
 
@@ -133,7 +133,7 @@ async function processLoadedImage(img, url, elements) {
             debugLog('Image loaded, starting QR code decoding');
             debugLog(`Image size: ${img.naturalWidth}x${img.naturalHeight}`);
 
-            // 等待图像完全加载
+            // Wait for image to fully load
             await new Promise(r => setTimeout(r, 100));
 
             if (!img.complete) {
@@ -145,7 +145,7 @@ async function processLoadedImage(img, url, elements) {
             }
 
             try {
-                // 直接使用img元素进行解码
+                // Directly use img element for decoding
                 const result = await codeReader.decode(img);
                 debugLog('QR code decoding completed');
 
@@ -169,18 +169,18 @@ async function processLoadedImage(img, url, elements) {
     });
 }
 
-// 处理剪切板内容
+// Process clipboard content
 async function processClipboard() {
     debugLog('Start reading clipboard content');
     const elements = getDOMElements();
 
     try {
-        // 尝试读取剪贴板中的文本
+        // Try to read text from clipboard
         try {
             const text = await navigator.clipboard.readText();
             debugLog('Clipboard text reading completed');
 
-            // 如果成功处理了文本，则返回
+            // If text was processed successfully, return
             if (await processClipboardText(text, elements)) {
                 return;
             }
@@ -189,7 +189,7 @@ async function processClipboard() {
             console.error('Error reading clipboard text:', textError);
         }
 
-        // 如果没有文本或读取文本失败，尝试读取图像
+        // If no text or text reading failed, try reading image
         await processClipboardImage(elements);
     } catch (error) {
         console.error('Error reading clipboard:', error);
@@ -197,19 +197,19 @@ async function processClipboard() {
     }
 }
 
-// 页面加载完成后等待获得焦点
+// Wait for focus after page loads
 document.addEventListener('DOMContentLoaded', () => {
     debugLog('Page loaded, waiting for focus');
     window.focus();
 });
 
-// 当页面获得焦点时处理剪切板
+// Process clipboard when page gains focus
 window.addEventListener('focus', () => {
     debugLog('Page gained focus, starting clipboard processing');
     processClipboard();
 });
 
-// 通知background.js处理已完成
+// Notify background.js that processing is complete
 chrome.runtime.sendMessage({ type: 'processClipboard' }, response => {
     if (response && response.success) {
         debugLog('Notified background.js processing completed');
