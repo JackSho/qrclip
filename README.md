@@ -2,8 +2,7 @@
 
 A Chrome extension that detects and parses QR codes from clipboard images, and generates QR codes from clipboard text content.
 
-[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/YOUR_EXTENSION_ID_HERE?label=Chrome%20Web%20Store)](https://chrome.google.com/webstore/detail/YOUR_EXTENSION_ID_HERE)
-[![GitHub](https://img.shields.io/github/v/release/JackSho/qrclip?label=GitHub)](https://github.com/JackSho/qrclip)
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/oimgoeaiackbfhgdidmiffkcgmhgknnm?label=QRClip)](https://chrome.google.com/webstore/detail/oimgoeaiackbfhgdidmiffkcgmhgknnm)
 
 ## Features
 
@@ -11,17 +10,11 @@ A Chrome extension that detects and parses QR codes from clipboard images, and g
 - One-click copy decoded text to clipboard
 - Directly open URL if decoded content is a web address
 - Generate QR codes from clipboard text content
-- Automatic processing when extension popup gains focus
-- Error handling for various clipboard content types
-- Support for PNG image format
-- Real-time display of QR code images from clipboard
 
 ## Installation
 
-1. Clone this repository
-2. Open Chrome and go to `chrome://extensions/`
-3. Enable "Developer mode"
-4. Click "Load unpacked" and select the extension directory
+1. Go to [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/oimgoeaiackbfhgdidmiffkcgmhgknnm?label=QRClip)](https://chrome.google.com/webstore/detail/oimgoeaiackbfhgdidmiffkcgmhgknnm)
+2. Click Button `Add To Chrome`.
 
 ## Usage
 
