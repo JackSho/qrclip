@@ -46,7 +46,7 @@ async function processClipboardText(text, elements) {
     qrImageDiv.appendChild(qrCode);
 
     // Display text content
-    resultDiv.textContent = text;
+    renderResult(text, elements);
 
     // Hide copy button (text content is already in clipboard, no need to copy again)
     copyBtn.style.display = 'none';
