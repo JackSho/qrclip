@@ -56,23 +56,67 @@ async function processClipboardText(text, elements) {
     return true;
 }
 
+function parseHttpUrl(text) {
+    if (typeof text !== 'string') {
+        return null;
+    }
+
+    const displayText = text.trim();
+    if (!displayText) {
+        return null;
+    }
+    if (!/^https?:\/\/[^/]/i.test(displayText) ||
+        /[\s\u0000-\u001F\u007F\\]/.test(displayText)) {
+        return null;
+    }
+
+    try {
+        const parsedUrl = new URL(displayText);
+        if ((parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') ||
+            !parsedUrl.hostname) {
+            return null;
+        }
+
+        return { displayText, url: parsedUrl.href };
+    } catch (error) {
+        return null;
+    }
+}
+
+// Render text content, making only complete HTTP(S) URLs clickable
+function renderResult(text, elements) {
+    const { resultDiv, errorDiv } = elements;
+    const parsedUrl = parseHttpUrl(text);
+
+    resultDiv.replaceChildren();
+
+    if (!parsedUrl) {
+        resultDiv.textContent = text;
+        return;
+    }
+
+    const urlLink = document.createElement('a');
+    urlLink.className = 'url-link';
+    urlLink.href = parsedUrl.url;
+    urlLink.textContent = parsedUrl.displayText;
+    urlLink.addEventListener('click', async event => {
+        event.preventDefault();
+        try {
+            await chrome.tabs.create({ url: parsedUrl.url });
+        } catch (error) {
+            console.error('Failed to open link:', error);
+            errorDiv.textContent = 'Failed to open link';
+            errorDiv.style.display = 'block';
+        }
+    });
+    resultDiv.appendChild(urlLink);
+}
+
 // Handle decoded text
 function handleDecodedText(decodedText, elements) {
-    const { resultDiv, errorDiv, copyBtn } = elements;
+    const { errorDiv, copyBtn } = elements;
 
-    // Check if it's a URL
-    const isUrl = /^(https?:\/\/)?[\w-]+(\.\w[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/.test(decodedText);
-
-    if (isUrl) {
-        // Create clickable link
-        resultDiv.innerHTML = `<span class="url-link">${decodedText}</span>`;
-        const urlLink = resultDiv.querySelector('.url-link');
-        urlLink.addEventListener('click', () => {
-            chrome.tabs.create({ url: decodedText.startsWith('http') ? decodedText : `https://${decodedText}` });
-        });
-    } else {
-        resultDiv.textContent = decodedText;
-    }
+    renderResult(decodedText, elements);
 
     // Show copy button
     copyBtn.style.display = 'inline-block';
